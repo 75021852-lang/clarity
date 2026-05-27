@@ -3,800 +3,868 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clarity — See exactly what your time costs</title>
-<meta name="description" content="Free Chrome extension that tracks your social media time, counts meeting costs in real time, and detects dark patterns. No account needed. 100% private.">
+<title>Clarity — See Exactly What Your Time Costs</title>
+<meta name="description" content="Free Chrome extension. Tracks your social media time, counts meeting costs live, detects dark patterns. No account. 100% private.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cabinet+Grotesk:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --navy: #080e1e;
-    --navy2: #0f172a;
-    --navy3: #1a2744;
-    --blue: #3b82f6;
-    --blue-light: #60a5fa;
-    --blue-glow: rgba(59,130,246,0.15);
-    --orange: #f97316;
-    --pink: #ec4899;
-    --purple: #8b5cf6;
-    --green: #22c55e;
-    --text: #e2e8f0;
-    --muted: #94a3b8;
-    --dim: #475569;
-    --border: rgba(255,255,255,0.08);
-  }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--navy);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 16px;
-    line-height: 1.6;
-    overflow-x: hidden;
-  }
-
-  /* ── NOISE TEXTURE ── */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.4;
-  }
-
-  /* ── NAV ── */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0;
-    z-index: 100;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 20px 48px;
-    background: rgba(8,14,30,0.8);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .nav-logo {
-    font-family: 'Syne', sans-serif;
-    font-size: 22px; font-weight: 800;
-    color: #fff; letter-spacing: -0.5px;
-  }
-  .nav-logo span { color: var(--blue-light); }
-
-  .nav-links { display: flex; gap: 32px; align-items: center; }
-  .nav-links a {
-    color: var(--muted); text-decoration: none;
-    font-size: 14px; font-weight: 500;
-    transition: color 0.2s;
-  }
-  .nav-links a:hover { color: #fff; }
-
-  .nav-cta {
-    background: var(--blue);
-    color: #fff !important;
-    padding: 9px 20px;
-    border-radius: 8px;
-    font-weight: 600 !important;
-    transition: background 0.2s, transform 0.1s !important;
-  }
-  .nav-cta:hover { background: #2563eb !important; transform: translateY(-1px); }
-
-  /* ── HERO ── */
-  .hero {
-    min-height: 100vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    text-align: center;
-    padding: 140px 24px 80px;
-    position: relative;
-  }
-
-  .hero-glow {
-    position: absolute;
-    width: 800px; height: 800px;
-    background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-  }
-
-  .hero-badge {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(59,130,246,0.1);
-    border: 1px solid rgba(59,130,246,0.3);
-    border-radius: 20px;
-    padding: 6px 16px;
-    font-size: 13px; font-weight: 500;
-    color: var(--blue-light);
-    margin-bottom: 32px;
-    animation: fadeUp 0.6s ease both;
-  }
-
-  .badge-dot {
-    width: 7px; height: 7px;
-    background: var(--green);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-  }
-
-  h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(48px, 8vw, 88px);
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -2px;
-    color: #fff;
-    margin-bottom: 24px;
-    animation: fadeUp 0.6s 0.1s ease both;
-  }
-
-  h1 em {
-    font-style: normal;
-    color: var(--blue-light);
-    position: relative;
-  }
-
-  .hero-sub {
-    font-size: clamp(18px, 2.5vw, 22px);
-    color: var(--muted);
-    max-width: 560px;
-    margin: 0 auto 48px;
-    font-weight: 300;
-    animation: fadeUp 0.6s 0.2s ease both;
-  }
-
-  .hero-actions {
-    display: flex; gap: 16px; flex-wrap: wrap;
-    justify-content: center;
-    animation: fadeUp 0.6s 0.3s ease both;
-  }
-
-  .btn-primary {
-    display: inline-flex; align-items: center; gap: 10px;
-    background: var(--blue);
-    color: #fff;
-    padding: 16px 32px;
-    border-radius: 12px;
-    font-size: 16px; font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-    box-shadow: 0 0 40px rgba(59,130,246,0.3);
-  }
-  .btn-primary:hover {
-    background: #2563eb;
-    transform: translateY(-2px);
-    box-shadow: 0 0 60px rgba(59,130,246,0.4);
-  }
-
-  .btn-secondary {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 16px 28px;
-    border-radius: 12px;
-    font-size: 16px; font-weight: 500;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-  .btn-secondary:hover {
-    background: rgba(255,255,255,0.1);
-    transform: translateY(-2px);
-  }
-
-  .hero-note {
-    margin-top: 20px;
-    font-size: 13px;
-    color: var(--dim);
-    animation: fadeUp 0.6s 0.4s ease both;
-  }
-
-  /* ── MOCKUP ── */
-  .mockup-wrap {
-    margin-top: 72px;
-    position: relative;
-    animation: fadeUp 0.8s 0.5s ease both;
-  }
-
-  .mockup-glow {
-    position: absolute;
-    inset: -40px;
-    background: radial-gradient(ellipse at center, rgba(59,130,246,0.15) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .mockup {
-    background: rgba(15,23,42,0.95);
-    border: 1px solid rgba(59,130,246,0.2);
-    border-radius: 20px;
-    padding: 24px;
-    width: 360px;
-    box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 60px rgba(59,130,246,0.1);
-    position: relative;
-  }
-
-  .mockup-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  .mockup-logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800; font-size: 18px; color: #fff;
-  }
-  .mockup-logo span { color: var(--blue-light); }
-  .mockup-live {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 11px; color: var(--green); font-weight: 600;
-  }
-  .live-dot {
-    width: 6px; height: 6px;
-    background: var(--green); border-radius: 50%;
-    animation: pulse 1.5s infinite;
-  }
-
-  .total-card {
-    background: linear-gradient(135deg, rgba(30,58,95,0.8), rgba(26,39,68,0.8));
-    border-radius: 12px; padding: 16px;
-    margin-bottom: 16px; text-align: center;
-    border: 1px solid rgba(59,130,246,0.15);
-  }
-  .total-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
-  .total-value { font-family: 'Syne', sans-serif; font-size: 40px; font-weight: 800; color: #fff; line-height: 1.1; }
-  .total-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
-
-  .bar-list { display: flex; flex-direction: column; gap: 10px; }
-  .bar-row { display: flex; align-items: center; gap: 10px; }
-  .bar-site { font-size: 12px; color: var(--muted); width: 72px; flex-shrink: 0; }
-  .bar-track { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 3px; }
-  .bar-time { font-size: 11px; color: var(--dim); width: 32px; text-align: right; flex-shrink: 0; }
-
-  /* ── SECTIONS ── */
-  section { padding: 100px 24px; position: relative; }
-
-  .container { max-width: 1100px; margin: 0 auto; }
-
-  .section-label {
-    font-size: 12px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 2px;
-    color: var(--blue-light);
-    margin-bottom: 16px;
-  }
-
-  h2 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(36px, 5vw, 56px);
-    font-weight: 800; line-height: 1.1;
-    letter-spacing: -1px; color: #fff;
-    margin-bottom: 20px;
-  }
-
-  h2 em { font-style: normal; color: var(--blue-light); }
-
-  .section-sub {
-    font-size: 18px; color: var(--muted);
-    max-width: 540px;
-    font-weight: 300;
-    margin-bottom: 64px;
-  }
-
-  /* ── FEATURES ── */
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 24px;
-  }
-
-  .feature-card {
-    background: rgba(15,23,42,0.6);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 32px;
-    transition: all 0.3s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .feature-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    border-radius: 16px 16px 0 0;
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-
-  .feature-card:hover {
-    border-color: rgba(59,130,246,0.3);
-    transform: translateY(-4px);
-    background: rgba(15,23,42,0.9);
-  }
-
-  .feature-card:hover::before { opacity: 1; }
-  .feature-card.blue::before { background: var(--blue); }
-  .feature-card.orange::before { background: var(--orange); }
-  .feature-card.purple::before { background: var(--purple); }
-  .feature-card.pink::before { background: var(--pink); }
-
-  .feature-icon {
-    width: 52px; height: 52px;
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
-
-  .feature-icon.blue { background: rgba(59,130,246,0.15); }
-  .feature-icon.orange { background: rgba(249,115,22,0.15); }
-  .feature-icon.purple { background: rgba(139,92,246,0.15); }
-  .feature-icon.pink { background: rgba(236,72,153,0.15); }
-
-  .feature-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 20px; font-weight: 700;
-    color: #fff; margin-bottom: 10px;
-  }
-
-  .feature-desc { font-size: 15px; color: var(--muted); line-height: 1.6; }
-
-  .feature-tag {
-    display: inline-block;
-    margin-top: 16px;
-    font-size: 11px; font-weight: 600;
-    padding: 4px 10px; border-radius: 20px;
-  }
-
-  .tag-blue { background: rgba(59,130,246,0.15); color: var(--blue-light); }
-  .tag-orange { background: rgba(249,115,22,0.15); color: #fb923c; }
-  .tag-purple { background: rgba(139,92,246,0.15); color: #a78bfa; }
-  .tag-pink { background: rgba(236,72,153,0.15); color: #f472b6; }
-
-  /* ── STATS ── */
-  .stats-section {
-    background: rgba(15,23,42,0.4);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 48px;
-    text-align: center;
-  }
-
-  .stat-value {
-    font-family: 'Syne', sans-serif;
-    font-size: 48px; font-weight: 800;
-    color: #fff; line-height: 1;
-    margin-bottom: 8px;
-  }
-
-  .stat-value span { color: var(--blue-light); }
-  .stat-label { font-size: 14px; color: var(--muted); }
-
-  /* ── MEETING DEMO ── */
-  .meeting-demo {
-    background: rgba(10,16,33,0.8);
-    border: 1px solid rgba(59,130,246,0.2);
-    border-radius: 16px;
-    overflow: hidden;
-    max-width: 700px;
-    box-shadow: 0 20px 80px rgba(0,0,0,0.4);
-  }
-
-  .meeting-bar {
-    background: linear-gradient(135deg, #1a2a4a, #0f172a);
-    padding: 0 20px;
-    height: 48px;
-    display: flex; align-items: center; justify-content: space-between;
-    border-bottom: 1px solid rgba(59,130,246,0.15);
-  }
-
-  .meeting-brand {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700; font-size: 14px;
-    color: var(--blue-light);
-  }
-
-  .meeting-stats { display: flex; gap: 28px; }
-  .mstat { text-align: center; }
-  .mstat-label { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; }
-  .mstat-value { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; color: #fff; }
-  .mstat-value.orange { color: var(--orange); }
-
-  .meeting-content {
-    padding: 32px;
-    display: flex; align-items: center; justify-content: center;
-    min-height: 140px;
-    color: var(--dim);
-    font-size: 14px;
-    text-align: center;
-    background: linear-gradient(180deg, rgba(10,16,33,0) 0%, rgba(10,16,33,0.5) 100%);
-  }
-
-  /* ── PRIVACY ── */
-  .privacy-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-  }
-
-  .privacy-item {
-    display: flex; gap: 16px; align-items: flex-start;
-    background: rgba(15,23,42,0.4);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 20px;
-  }
-
-  .privacy-check {
-    width: 28px; height: 28px; flex-shrink: 0;
-    background: rgba(34,197,94,0.15);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    color: var(--green);
-    font-weight: 700;
-  }
-
-  .privacy-text strong { display: block; font-size: 14px; color: #fff; margin-bottom: 4px; }
-  .privacy-text span { font-size: 13px; color: var(--muted); }
-
-  /* ── CTA ── */
-  .cta-section {
-    text-align: center;
-    background: radial-gradient(ellipse at center, rgba(59,130,246,0.08) 0%, transparent 70%);
-  }
-
-  .cta-box {
-    background: rgba(15,23,42,0.8);
-    border: 1px solid rgba(59,130,246,0.2);
-    border-radius: 24px;
-    padding: 72px 48px;
-    max-width: 680px;
-    margin: 0 auto;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .cta-box::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--blue), transparent);
-  }
-
-  .cta-box h2 { margin-bottom: 16px; }
-  .cta-box p { color: var(--muted); margin-bottom: 36px; font-size: 18px; }
-
-  .kofi-btn {
-    display: inline-flex; align-items: center; gap: 10px;
-    background: linear-gradient(135deg, #FF5E5B, #e04949);
-    color: #fff;
-    padding: 14px 28px;
-    border-radius: 10px;
-    font-size: 15px; font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-    margin-top: 16px;
-  }
-  .kofi-btn:hover { opacity: 0.9; transform: translateY(-2px); }
-
-  /* ── FOOTER ── */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 40px 48px;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 16px;
-  }
-
-  .footer-logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800; font-size: 18px; color: #fff;
-  }
-  .footer-logo span { color: var(--blue-light); }
-
-  .footer-links { display: flex; gap: 24px; }
-  .footer-links a { color: var(--dim); font-size: 14px; text-decoration: none; transition: color 0.2s; }
-  .footer-links a:hover { color: var(--text); }
-
-  .footer-copy { color: var(--dim); font-size: 13px; }
-
-  /* ── ANIMATIONS ── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .reveal {
-    opacity: 0; transform: translateY(32px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .reveal.visible { opacity: 1; transform: translateY(0); }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 768px) {
-    nav { padding: 16px 24px; }
-    .nav-links { display: none; }
-    footer { flex-direction: column; text-align: center; padding: 32px 24px; }
-    .footer-links { justify-content: center; }
-    .cta-box { padding: 48px 24px; }
-    .mockup { width: 100%; max-width: 360px; }
-  }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#04080f;
+  --paper:#f5f0e8;
+  --blue:#1a56ff;
+  --blue-dim:#0a2a8a;
+  --orange:#ff4d00;
+  --green:#00c853;
+  --red:#ff1744;
+  --gold:#ffc400;
+  --white:#ffffff;
+  --gray:#8a8a8a;
+  --border:#1a1a2e;
+}
+html{scroll-behavior:smooth;cursor:none}
+
+/* CUSTOM CURSOR */
+.cursor{position:fixed;width:12px;height:12px;background:var(--blue);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform 0.1s,width 0.2s,height 0.2s,background 0.2s;mix-blend-mode:difference}
+.cursor-ring{position:fixed;width:40px;height:40px;border:1.5px solid var(--blue);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:transform 0.15s ease,width 0.3s,height 0.3s;mix-blend-mode:difference}
+
+body{
+  background:var(--ink);
+  color:var(--white);
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:16px;
+  line-height:1.5;
+  overflow-x:hidden;
+}
+
+/* GRAIN */
+body::after{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:1;opacity:0.35;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 48px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  background:rgba(4,8,15,0.85);
+  backdrop-filter:blur(24px);
+}
+.nav-logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:28px;letter-spacing:2px;color:var(--white);
+  text-decoration:none;
+}
+.nav-logo span{color:var(--blue)}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{color:rgba(255,255,255,0.5);text-decoration:none;font-size:13px;font-weight:500;letter-spacing:0.5px;text-transform:uppercase;transition:color 0.2s}
+.nav-links a:hover{color:var(--white)}
+.nav-cta{
+  background:var(--blue);color:var(--white)!important;
+  padding:10px 22px;border-radius:4px;
+  font-weight:700!important;letter-spacing:1px!important;
+  transition:background 0.2s,transform 0.1s!important;
+}
+.nav-cta:hover{background:#0040ff!important;transform:translateY(-1px)}
+
+/* HERO */
+.hero{
+  min-height:100vh;
+  display:grid;grid-template-columns:1fr 1fr;
+  align-items:center;
+  padding:120px 48px 80px;
+  position:relative;
+  overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 80% at 70% 50%, rgba(26,86,255,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 20% 80%, rgba(255,77,0,0.05) 0%, transparent 50%);
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size:80px 80px;
+}
+
+.hero-left{position:relative;z-index:2}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+  color:var(--blue);margin-bottom:28px;
+  border:1px solid rgba(26,86,255,0.3);
+  padding:8px 16px;border-radius:2px;
+  background:rgba(26,86,255,0.06);
+}
+.eyebrow-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(72px,10vw,120px);
+  line-height:0.9;
+  letter-spacing:2px;
+  color:var(--white);
+  margin-bottom:32px;
+}
+h1 .blue{color:var(--blue)}
+h1 .outline{
+  -webkit-text-stroke:2px var(--white);
+  color:transparent;
+}
+h1 .orange{color:var(--orange)}
+
+.hero-sub{
+  font-size:18px;color:rgba(255,255,255,0.55);
+  max-width:480px;margin-bottom:44px;
+  font-weight:400;line-height:1.7;
+}
+
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.btn-main{
+  display:inline-flex;align-items:center;gap:12px;
+  background:var(--blue);color:var(--white);
+  padding:18px 36px;border-radius:4px;
+  font-size:15px;font-weight:800;
+  text-decoration:none;letter-spacing:0.5px;
+  text-transform:uppercase;
+  transition:all 0.2s;
+  box-shadow:0 0 60px rgba(26,86,255,0.35);
+  position:relative;overflow:hidden;
+}
+.btn-main::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.15) 0%,transparent 60%);
+  opacity:0;transition:opacity 0.2s;
+}
+.btn-main:hover::before{opacity:1}
+.btn-main:hover{transform:translateY(-2px);box-shadow:0 0 80px rgba(26,86,255,0.5)}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:8px;
+  background:transparent;color:rgba(255,255,255,0.6);
+  padding:18px 28px;border-radius:4px;
+  font-size:14px;font-weight:600;
+  text-decoration:none;letter-spacing:0.5px;
+  border:1px solid rgba(255,255,255,0.15);
+  transition:all 0.2s;
+}
+.btn-ghost:hover{color:var(--white);border-color:rgba(255,255,255,0.4)}
+
+.hero-note{margin-top:20px;font-size:12px;color:rgba(255,255,255,0.25);letter-spacing:0.5px}
+
+/* HERO RIGHT - LIVE MOCKUP */
+.hero-right{position:relative;z-index:2;display:flex;justify-content:center;align-items:center}
+.mockup-outer{
+  position:relative;
+  filter:drop-shadow(0 40px 100px rgba(26,86,255,0.25));
+}
+.mockup-glow{
+  position:absolute;inset:-60px;
+  background:radial-gradient(ellipse at center,rgba(26,86,255,0.2) 0%,transparent 70%);
+  pointer-events:none;
+}
+.mockup{
+  width:320px;
+  background:#080d1a;
+  border:1px solid rgba(26,86,255,0.25);
+  border-radius:16px;
+  overflow:hidden;
+  position:relative;
+}
+.mockup-topbar{
+  background:rgba(26,86,255,0.08);
+  border-bottom:1px solid rgba(26,86,255,0.15);
+  padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.mockup-brand{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--white)}
+.mockup-brand span{color:var(--blue)}
+.mockup-live{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green);font-weight:700;letter-spacing:1px}
+.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1.5s infinite}
+
+.mockup-body{padding:16px}
+.total-section{
+  background:linear-gradient(135deg,rgba(26,86,255,0.12),rgba(26,86,255,0.04));
+  border:1px solid rgba(26,86,255,0.15);
+  border-radius:10px;padding:14px;margin-bottom:14px;text-align:center;
+}
+.total-lbl{font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.total-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:52px;letter-spacing:1px;color:var(--white);line-height:1;
+}
+.total-sub{font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px}
+
+.bar-list{display:flex;flex-direction:column;gap:9px}
+.bar-item{display:flex;align-items:center;gap:10px}
+.bar-site{font-size:11px;color:rgba(255,255,255,0.45);width:64px;flex-shrink:0}
+.bar-track{flex:1;height:5px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;position:relative}
+.bar-fill::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:rgba(255,255,255,0.3);border-radius:3px}
+.bar-time{font-size:10px;color:rgba(255,255,255,0.3);width:30px;text-align:right;flex-shrink:0}
+
+.mockup-cost{
+  margin-top:12px;
+  background:rgba(255,77,0,0.08);
+  border:1px solid rgba(255,77,0,0.2);
+  border-radius:8px;padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.cost-lbl{font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase}
+.cost-val{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--orange);letter-spacing:1px}
+.cost-sub{font-size:10px;color:rgba(255,77,0,0.5)}
+
+/* TICKER */
+.ticker-wrap{
+  overflow:hidden;border-top:1px solid rgba(255,255,255,0.06);border-bottom:1px solid rgba(255,255,255,0.06);
+  background:rgba(26,86,255,0.04);padding:14px 0;
+}
+.ticker{display:flex;gap:48px;animation:ticker 20s linear infinite;white-space:nowrap}
+.ticker-item{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.25);flex-shrink:0;display:flex;align-items:center;gap:16px}
+.ticker-item span{color:var(--blue)}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* STATS ROW */
+.stats-row{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.stat-cell{
+  padding:60px 40px;
+  border-right:1px solid rgba(255,255,255,0.06);
+  position:relative;overflow:hidden;
+  transition:background 0.3s;
+}
+.stat-cell:last-child{border-right:none}
+.stat-cell:hover{background:rgba(26,86,255,0.04)}
+.stat-cell::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--blue);transform:scaleX(0);transform-origin:left;
+  transition:transform 0.4s ease;
+}
+.stat-cell:hover::before{transform:scaleX(1)}
+.stat-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:64px;letter-spacing:1px;color:var(--white);line-height:1;
+  margin-bottom:8px;
+}
+.stat-num .accent{color:var(--blue)}
+.stat-label{font-size:13px;color:rgba(255,255,255,0.35);line-height:1.5;font-weight:400}
+
+/* SECTION BASE */
+.section{padding:120px 48px;position:relative}
+.section-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:120px;color:rgba(255,255,255,0.03);
+  line-height:1;position:absolute;top:40px;right:48px;
+  letter-spacing:4px;pointer-events:none;
+  user-select:none;
+}
+.section-tag{
+  font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+  color:var(--blue);margin-bottom:20px;display:block;
+}
+h2{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(52px,7vw,88px);
+  line-height:0.9;letter-spacing:2px;
+  color:var(--white);margin-bottom:24px;
+}
+h2 .blue{color:var(--blue)}
+h2 .outline{-webkit-text-stroke:1.5px var(--white);color:transparent}
+h2 .orange{color:var(--orange)}
+
+/* FEATURES */
+.features-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.06);
+  margin-top:64px;
+}
+.feat{
+  background:var(--ink);padding:48px 40px;
+  position:relative;overflow:hidden;
+  transition:background 0.3s;
+}
+.feat:hover{background:#080d1a}
+.feat-accent{
+  position:absolute;top:0;left:0;right:0;height:3px;
+  transform:scaleX(0);transform-origin:left;
+  transition:transform 0.5s cubic-bezier(0.16,1,0.3,1);
+}
+.feat:hover .feat-accent{transform:scaleX(1)}
+.feat.blue .feat-accent{background:var(--blue)}
+.feat.orange .feat-accent{background:var(--orange)}
+.feat.purple .feat-accent{background:#a855f7}
+.feat.green .feat-accent{background:var(--green)}
+.feat.red .feat-accent{background:var(--red)}
+.feat.gold .feat-accent{background:var(--gold)}
+
+.feat-icon{
+  width:56px;height:56px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;margin-bottom:24px;
+  position:relative;
+}
+.feat.blue .feat-icon{background:rgba(26,86,255,0.12);border:1px solid rgba(26,86,255,0.2)}
+.feat.orange .feat-icon{background:rgba(255,77,0,0.12);border:1px solid rgba(255,77,0,0.2)}
+.feat.purple .feat-icon{background:rgba(168,85,247,0.12);border:1px solid rgba(168,85,247,0.2)}
+.feat.green .feat-icon{background:rgba(0,200,83,0.12);border:1px solid rgba(0,200,83,0.2)}
+.feat.red .feat-icon{background:rgba(255,23,68,0.12);border:1px solid rgba(255,23,68,0.2)}
+.feat.gold .feat-icon{background:rgba(255,196,0,0.12);border:1px solid rgba(255,196,0,0.2)}
+
+.feat-title{font-size:20px;font-weight:800;color:var(--white);margin-bottom:12px;line-height:1.2}
+.feat-desc{font-size:14px;color:rgba(255,255,255,0.4);line-height:1.7}
+.feat-badge{
+  display:inline-block;margin-top:20px;
+  font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  padding:5px 12px;border-radius:2px;
+}
+.feat.blue .feat-badge{background:rgba(26,86,255,0.15);color:#6b9fff}
+.feat.orange .feat-badge{background:rgba(255,77,0,0.15);color:#ff8555}
+.feat.purple .feat-badge{background:rgba(168,85,247,0.15);color:#c084fc}
+.feat.green .feat-badge,.feat.red .feat-badge,.feat.gold .feat-badge{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4)}
+
+/* MEETING DEMO */
+.meeting-section{
+  padding:120px 48px;
+  background:linear-gradient(180deg,var(--ink) 0%,#060b18 100%);
+  border-top:1px solid rgba(255,255,255,0.06);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.meeting-layout{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.meeting-demo{
+  border:1px solid rgba(255,77,0,0.2);
+  border-radius:12px;overflow:hidden;
+  box-shadow:0 0 80px rgba(255,77,0,0.08);
+}
+.meeting-bar{
+  background:linear-gradient(135deg,#0f1e3d,#080d1a);
+  border-bottom:1px solid rgba(26,86,255,0.15);
+  padding:0 20px;height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.meeting-brand{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;color:#6b9fff}
+.meeting-stats{display:flex;gap:24px}
+.mstat{text-align:center}
+.mstat-lbl{font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1.5px;text-transform:uppercase}
+.mstat-val{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.5px;color:var(--white)}
+.mstat-val.hot{color:var(--orange)}
+.meeting-screen{
+  background:#0a0f1e;padding:40px;
+  display:flex;align-items:center;justify-content:center;
+  min-height:200px;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.01) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.01) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+.meeting-placeholder{text-align:center;color:rgba(255,255,255,0.12)}
+.meeting-placeholder div:first-child{font-size:48px;margin-bottom:12px}
+.meeting-placeholder div:last-child{font-size:13px;letter-spacing:0.5px}
+
+.meeting-copy h2{margin-bottom:20px}
+.meeting-copy p{font-size:17px;color:rgba(255,255,255,0.45);line-height:1.7;margin-bottom:32px}
+.cost-highlight{
+  background:rgba(255,77,0,0.08);
+  border:1px solid rgba(255,77,0,0.2);
+  border-left:4px solid var(--orange);
+  border-radius:0 8px 8px 0;
+  padding:20px 24px;
+  font-size:15px;color:rgba(255,255,255,0.6);
+  line-height:1.6;
+}
+.cost-highlight strong{color:var(--orange);font-size:22px}
+
+/* PRIVACY */
+.privacy-section{padding:120px 48px}
+.privacy-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.06);
+  margin-top:64px;
+}
+.privacy-item{
+  background:var(--ink);padding:40px;
+  display:flex;gap:20px;align-items:flex-start;
+  transition:background 0.2s;
+}
+.privacy-item:hover{background:#080d1a}
+.privacy-check{
+  width:32px;height:32px;border-radius:4px;flex-shrink:0;
+  background:rgba(0,200,83,0.1);border:1px solid rgba(0,200,83,0.2);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--green);font-size:14px;font-weight:800;margin-top:2px;
+}
+.privacy-title{font-size:15px;font-weight:700;color:var(--white);margin-bottom:6px}
+.privacy-desc{font-size:13px;color:rgba(255,255,255,0.35);line-height:1.6}
+
+/* SUPPORT / DONATION */
+.support-section{
+  padding:120px 48px;
+  background:#060b18;
+  border-top:1px solid rgba(255,255,255,0.06);
+}
+.support-inner{
+  max-width:800px;margin:0 auto;text-align:center;
+}
+.support-inner h2{margin-bottom:16px}
+.support-inner p{font-size:18px;color:rgba(255,255,255,0.4);margin-bottom:48px;line-height:1.7}
+.support-tiers{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:48px;text-align:left}
+.tier{
+  padding:32px;border-radius:8px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.02);
+  transition:all 0.3s;position:relative;overflow:hidden;
+}
+.tier:hover{border-color:rgba(255,255,255,0.15);background:rgba(255,255,255,0.04)}
+.tier.featured{
+  border-color:rgba(26,86,255,0.4);
+  background:rgba(26,86,255,0.06);
+}
+.tier.featured::before{
+  content:'MOST POPULAR';
+  position:absolute;top:16px;right:16px;
+  font-size:9px;font-weight:800;letter-spacing:2px;
+  color:var(--blue);
+}
+.tier-name{font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:8px}
+.tier-price{font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:1px;color:var(--white);line-height:1;margin-bottom:16px}
+.tier-price span{font-size:20px;color:rgba(255,255,255,0.3)}
+.tier-desc{font-size:13px;color:rgba(255,255,255,0.35);line-height:1.6;margin-bottom:20px}
+.tier-perks{display:flex;flex-direction:column;gap:8px}
+.tier-perk{display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,0.5)}
+.tier-perk::before{content:'→';color:var(--blue);font-weight:700}
+.tier-btn{
+  display:block;width:100%;margin-top:24px;padding:14px;
+  text-align:center;border-radius:4px;
+  font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  text-decoration:none;transition:all 0.2s;
+}
+.tier-btn.primary{background:var(--blue);color:var(--white)}
+.tier-btn.primary:hover{background:#0040ff}
+.tier-btn.secondary{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.1)}
+.tier-btn.secondary:hover{background:rgba(255,255,255,0.1);color:var(--white)}
+.kofi-strip{
+  display:flex;align-items:center;justify-content:center;gap:16px;
+  padding:24px;border:1px solid rgba(255,94,91,0.2);border-radius:8px;
+  background:rgba(255,94,91,0.04);
+}
+.kofi-strip p{font-size:14px;color:rgba(255,255,255,0.4)}
+.kofi-strip a{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#FF5E5B;color:var(--white);
+  padding:12px 24px;border-radius:4px;
+  font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  text-decoration:none;white-space:nowrap;transition:opacity 0.2s;
+}
+.kofi-strip a:hover{opacity:0.9}
+
+/* CTA FINAL */
+.cta-section{
+  padding:160px 48px;
+  text-align:center;position:relative;overflow:hidden;
+}
+.cta-section::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(26,86,255,0.1) 0%,transparent 70%);
+}
+.cta-section h2{font-size:clamp(64px,10vw,120px);margin-bottom:24px;position:relative}
+.cta-section p{font-size:18px;color:rgba(255,255,255,0.4);margin-bottom:48px;position:relative}
+.cta-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative}
+
+/* FOOTER */
+footer{
+  border-top:1px solid rgba(255,255,255,0.06);
+  padding:48px;
+  display:grid;grid-template-columns:1fr auto 1fr;
+  align-items:center;gap:32px;
+}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--white)}
+.footer-logo span{color:var(--blue)}
+.footer-links{display:flex;gap:24px;justify-content:center}
+.footer-links a{color:rgba(255,255,255,0.25);font-size:12px;text-decoration:none;letter-spacing:0.5px;text-transform:uppercase;transition:color 0.2s}
+.footer-links a:hover{color:rgba(255,255,255,0.6)}
+.footer-copy{font-size:12px;color:rgba(255,255,255,0.15);text-align:right;letter-spacing:0.5px}
+
+/* SCROLL REVEAL */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity 0.8s cubic-bezier(0.16,1,0.3,1),transform 0.8s cubic-bezier(0.16,1,0.3,1)}
+.reveal.up{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+.reveal-delay-4{transition-delay:0.4s}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:16px 24px}
+  .nav-links{display:none}
+  .hero{grid-template-columns:1fr;padding:120px 24px 60px;gap:48px}
+  .hero-right{display:none}
+  h1{font-size:72px}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .stat-cell{padding:40px 24px}
+  .features-grid{grid-template-columns:1fr}
+  .meeting-layout{grid-template-columns:1fr;gap:40px}
+  .privacy-grid{grid-template-columns:1fr}
+  .support-tiers{grid-template-columns:1fr}
+  .section{padding:80px 24px}
+  footer{grid-template-columns:1fr;text-align:center}
+  .footer-copy{text-align:center}
+}
 </style>
 </head>
 <body>
 
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
 <!-- NAV -->
 <nav>
-  <div class="nav-logo">Clarity<span>.</span></div>
+  <a href="#" class="nav-logo">Clarity<span>.</span></a>
   <div class="nav-links">
     <a href="#features">Features</a>
+    <a href="#meetings">Meetings</a>
     <a href="#privacy">Privacy</a>
-    <a href="https://ko-fi.com/clarifyapp">Support</a>
-    <a href="https://ko-fi.com/clarifyapp" class="nav-cta">Get Clarity — Free</a>
+    <a href="#support">Support</a>
+    <a href="https://chromewebstore.google.com/detail/eamlgefleeenefkgdmdkkjhhpjdmhdmn" class="nav-cta">Install Free →</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-glow"></div>
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
 
-  <div class="hero-badge">
-    <div class="badge-dot"></div>
-    Free Chrome Extension · No account needed
+  <div class="hero-left">
+    <div class="hero-eyebrow reveal">
+      <div class="eyebrow-dot"></div>
+      Live on Chrome Web Store · Free Forever
+    </div>
+
+    <h1 class="reveal reveal-delay-1">
+      SEE<br>
+      <span class="blue">EXACTLY</span><br>
+      WHAT YOUR<br>
+      <span class="outline">TIME</span><br>
+      <span class="orange">COSTS.</span>
+    </h1>
+
+    <p class="hero-sub reveal reveal-delay-2">
+      Clarity tracks your social media time, shows the real dollar cost of every meeting, and catches manipulative design tricks — all running silently in Chrome.
+    </p>
+
+    <div class="hero-actions reveal reveal-delay-3">
+      <a href="https://chromewebstore.google.com/detail/eamlgefleeenefkgdmdkkjhhpjdmhdmn" class="btn-main">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+        Add to Chrome — Free
+      </a>
+      <a href="#features" class="btn-ghost">See how it works ↓</a>
+    </div>
+    <p class="hero-note reveal reveal-delay-4">No account · No tracking · 100% local · Works on Chrome, Edge & Brave</p>
   </div>
 
-  <h1>See exactly what<br>your time <em>costs.</em></h1>
-
-  <p class="hero-sub">Clarity tracks your social media time, counts the real dollar cost of your meetings, and catches manipulative design tricks — all in your browser.</p>
-
-  <div class="hero-actions">
-    <a href="https://ko-fi.com/clarifyapp" class="btn-primary">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-      Add to Chrome — Free
-    </a>
-    <a href="#features" class="btn-secondary">See how it works →</a>
-  </div>
-
-  <p class="hero-note">100% free · No account · No data ever leaves your device</p>
-
-  <!-- MOCKUP -->
-  <div class="mockup-wrap">
-    <div class="mockup-glow"></div>
-    <div class="mockup">
-      <div class="mockup-header">
-        <div class="mockup-logo">Clarity<span>.</span></div>
-        <div class="mockup-live"><div class="live-dot"></div> Tracking now</div>
-      </div>
-
-      <div class="total-card">
-        <div class="total-label">Today's total</div>
-        <div class="total-value">3h 42m</div>
-        <div class="total-sub">Most time on Instagram</div>
-      </div>
-
-      <div class="bar-list">
-        <div class="bar-row">
-          <div class="bar-site">Instagram</div>
-          <div class="bar-track"><div class="bar-fill" style="width:90%;background:#ec4899"></div></div>
-          <div class="bar-time">1h 24m</div>
+  <div class="hero-right reveal reveal-delay-2">
+    <div class="mockup-outer">
+      <div class="mockup-glow"></div>
+      <div class="mockup">
+        <div class="mockup-topbar">
+          <div class="mockup-brand">Clarity<span>.</span></div>
+          <div class="mockup-live"><div class="live-dot"></div> LIVE</div>
         </div>
-        <div class="bar-row">
-          <div class="bar-site">YouTube</div>
-          <div class="bar-track"><div class="bar-fill" style="width:65%;background:#ef4444"></div></div>
-          <div class="bar-time">58m</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-site">TikTok</div>
-          <div class="bar-track"><div class="bar-fill" style="width:45%;background:#60a5fa"></div></div>
-          <div class="bar-time">42m</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-site">Reddit</div>
-          <div class="bar-track"><div class="bar-fill" style="width:30%;background:#f97316"></div></div>
-          <div class="bar-time">28m</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-site">LinkedIn</div>
-          <div class="bar-track"><div class="bar-fill" style="width:12%;background:#8b5cf6"></div></div>
-          <div class="bar-time">10m</div>
+        <div class="mockup-body">
+          <div class="total-section">
+            <div class="total-lbl">Today's Total</div>
+            <div class="total-num" id="heroTime">3h 42m</div>
+            <div class="total-sub">Most time on Instagram</div>
+          </div>
+          <div class="bar-list">
+            <div class="bar-item">
+              <div class="bar-site">Instagram</div>
+              <div class="bar-track"><div class="bar-fill" style="width:90%;background:#ec4899"></div></div>
+              <div class="bar-time">1h 24m</div>
+            </div>
+            <div class="bar-item">
+              <div class="bar-site">YouTube</div>
+              <div class="bar-track"><div class="bar-fill" style="width:65%;background:#ef4444"></div></div>
+              <div class="bar-time">58m</div>
+            </div>
+            <div class="bar-item">
+              <div class="bar-site">TikTok</div>
+              <div class="bar-track"><div class="bar-fill" style="width:45%;background:#60a5fa"></div></div>
+              <div class="bar-time">42m</div>
+            </div>
+            <div class="bar-item">
+              <div class="bar-site">Reddit</div>
+              <div class="bar-track"><div class="bar-fill" style="width:28%;background:#f97316"></div></div>
+              <div class="bar-time">28m</div>
+            </div>
+            <div class="bar-item">
+              <div class="bar-site">LinkedIn</div>
+              <div class="bar-track"><div class="bar-fill" style="width:12%;background:#8b5cf6"></div></div>
+              <div class="bar-time">10m</div>
+            </div>
+          </div>
+          <div class="mockup-cost">
+            <div>
+              <div class="cost-lbl">Meeting Cost</div>
+              <div class="cost-sub">10 min · 8 people</div>
+            </div>
+            <div class="cost-val" id="heroCost">$104</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <div class="ticker-item">Screen Time Tracker <span>FREE</span></div>
+    <div class="ticker-item">Meeting Cost Counter <span>LIVE</span></div>
+    <div class="ticker-item">Dark Pattern Detector <span>NEW</span></div>
+    <div class="ticker-item">No Account Needed <span>EVER</span></div>
+    <div class="ticker-item">100% Private <span>ALWAYS</span></div>
+    <div class="ticker-item">Chrome · Edge · Brave <span>ALL</span></div>
+    <div class="ticker-item">Screen Time Tracker <span>FREE</span></div>
+    <div class="ticker-item">Meeting Cost Counter <span>LIVE</span></div>
+    <div class="ticker-item">Dark Pattern Detector <span>NEW</span></div>
+    <div class="ticker-item">No Account Needed <span>EVER</span></div>
+    <div class="ticker-item">100% Private <span>ALWAYS</span></div>
+    <div class="ticker-item">Chrome · Edge · Brave <span>ALL</span></div>
+  </div>
+</div>
 
 <!-- STATS -->
-<section class="stats-section" style="padding: 60px 24px;">
-  <div class="container">
-    <div class="stats-grid reveal">
-      <div>
-        <div class="stat-value">$<span>37</span>B</div>
-        <div class="stat-label">Lost to pointless meetings yearly in the US</div>
-      </div>
-      <div>
-        <div class="stat-value"><span>3.7</span>h</div>
-        <div class="stat-label">Average daily social media time on desktop</div>
-      </div>
-      <div>
-        <div class="stat-value"><span>$0</span></div>
-        <div class="stat-label">Cost to install and use Clarity forever</div>
-      </div>
-      <div>
-        <div class="stat-value"><span>0</span></div>
-        <div class="stat-label">Bytes of data ever sent to any server</div>
-      </div>
-    </div>
+<div class="stats-row">
+  <div class="stat-cell reveal">
+    <div class="stat-num"><span class="accent" data-target="37">0</span><span class="accent">B</span></div>
+    <div class="stat-label">dollars lost to pointless meetings yearly in the US</div>
   </div>
-</section>
+  <div class="stat-cell reveal reveal-delay-1">
+    <div class="stat-num"><span data-target="3">0</span><span class="accent">.7h</span></div>
+    <div class="stat-label">average daily social media time on desktop</div>
+  </div>
+  <div class="stat-cell reveal reveal-delay-2">
+    <div class="stat-num"><span class="accent">$</span><span data-target="0">0</span></div>
+    <div class="stat-label">cost to install and use Clarity — forever</div>
+  </div>
+  <div class="stat-cell reveal reveal-delay-3">
+    <div class="stat-num"><span data-target="0">0</span></div>
+    <div class="stat-label">bytes of your data ever sent to any server</div>
+  </div>
+</div>
 
 <!-- FEATURES -->
-<section id="features">
-  <div class="container">
-    <div class="section-label reveal">What Clarity does</div>
-    <h2 class="reveal">Three tools.<br><em>One extension.</em></h2>
-    <p class="section-sub reveal">Everything you need to see exactly where your time and money actually go.</p>
+<section class="section" id="features">
+  <div class="section-num">01</div>
+  <span class="section-tag reveal">What Clarity does</span>
+  <h2 class="reveal">THREE TOOLS.<br><span class="blue">ONE</span> <span class="outline">EXTENSION.</span></h2>
+  <p style="font-size:17px;color:rgba(255,255,255,0.4);max-width:500px;line-height:1.7" class="reveal reveal-delay-1">Everything you need to see where your time and money actually go. Installed in 30 seconds.</p>
 
-    <div class="features-grid">
-
-      <div class="feature-card blue reveal">
-        <div class="feature-icon blue">⏱</div>
-        <div class="feature-title">Social Media Time Tracker</div>
-        <div class="feature-desc">Tracks every minute you spend on Instagram, TikTok, YouTube, Reddit, and 6 more platforms. Live counter, daily breakdown, and 7-day chart so you can spot patterns.</div>
-        <span class="feature-tag tag-blue">Free forever</span>
-      </div>
-
-      <div class="feature-card orange reveal">
-        <div class="feature-icon orange">💰</div>
-        <div class="feature-title">Meeting Cost Counter</div>
-        <div class="feature-desc">Join a Google Meet or Zoom call and watch the real dollar cost tick up live. Set your hourly rate and attendee count — then show your manager the $104 that just got wasted.</div>
-        <span class="feature-tag tag-orange">Supporter unlock</span>
-      </div>
-
-      <div class="feature-card purple reveal">
-        <div class="feature-icon purple">🎭</div>
-        <div class="feature-title">Dark Pattern Detector</div>
-        <div class="feature-desc">Highlights manipulative design tricks on shopping sites in real time — fake countdown timers, pre-checked boxes, hidden unsubscribe buttons, fake scarcity, and more.</div>
-        <span class="feature-tag tag-purple">Supporter unlock</span>
-      </div>
-
-      <div class="feature-card pink reveal">
-        <div class="feature-icon pink">💀</div>
-        <div class="feature-title">Subscription Graveyard</div>
-        <div class="feature-desc">Scans your Gmail for recurring charges you forgot about. Shows you everything you're paying for — and what it's costing you every month. Coming soon.</div>
-        <span class="feature-tag tag-pink">Coming soon</span>
-      </div>
-
+  <div class="features-grid">
+    <div class="feat blue reveal">
+      <div class="feat-accent"></div>
+      <div class="feat-icon">⏱</div>
+      <div class="feat-title">Social Media Time Tracker</div>
+      <div class="feat-desc">Tracks every minute across Instagram, TikTok, YouTube, Reddit, Twitter, LinkedIn and more. Live counter, daily breakdown, 7-day trend chart, gentle nudge overlay.</div>
+      <span class="feat-badge">Free forever</span>
+    </div>
+    <div class="feat orange reveal reveal-delay-1">
+      <div class="feat-accent"></div>
+      <div class="feat-icon">💰</div>
+      <div class="feat-title">Meeting Cost Counter</div>
+      <div class="feat-desc">Join a Google Meet or Zoom — a live dollar ticker appears at the top of the screen. 10 minutes with 8 people at $75/hr = $100 gone. Pause, resume, summary on close.</div>
+      <span class="feat-badge">Supporter unlock</span>
+    </div>
+    <div class="feat purple reveal reveal-delay-2">
+      <div class="feat-accent"></div>
+      <div class="feat-icon">🎭</div>
+      <div class="feat-title">Dark Pattern Detector</div>
+      <div class="feat-desc">Highlights manipulative design tricks on shopping sites — fake countdowns, pre-checked boxes, hidden cancel buttons, fake scarcity. Outlined in red, explained on hover.</div>
+      <span class="feat-badge">Supporter unlock</span>
+    </div>
+    <div class="feat green reveal">
+      <div class="feat-accent"></div>
+      <div class="feat-icon">📊</div>
+      <div class="feat-title">Weekly Trends</div>
+      <div class="feat-desc">7-day bar chart shows your usage patterns across the week. See your worst day, best day, and daily average at a glance. Data exports anytime as JSON.</div>
+      <span class="feat-badge">Free forever</span>
+    </div>
+    <div class="feat red reveal reveal-delay-1">
+      <div class="feat-accent"></div>
+      <div class="feat-icon">💀</div>
+      <div class="feat-title">Subscription Graveyard</div>
+      <div class="feat-desc">Scans Gmail for recurring charges you forgot about. Shows everything you're paying for monthly — and what canceling them saves you every year.</div>
+      <span class="feat-badge">Coming soon</span>
+    </div>
+    <div class="feat gold reveal reveal-delay-2">
+      <div class="feat-accent"></div>
+      <div class="feat-icon">💰</div>
+      <div class="feat-title">Salary Slip</div>
+      <div class="feat-desc">Overlays real post-tax take-home pay on job listings across LinkedIn, Indeed, and Glassdoor. See what a job actually pays after taxes and cost of living.</div>
+      <span class="feat-badge">Coming soon</span>
     </div>
   </div>
 </section>
 
 <!-- MEETING DEMO -->
-<section style="padding: 40px 24px 100px;">
-  <div class="container" style="display:flex; flex-direction:column; align-items:center;">
-    <div class="section-label reveal" style="text-align:center">Meeting Cost Counter</div>
-    <h2 class="reveal" style="text-align:center; max-width:560px">$104 in 10 minutes.<br><em>Still think it's a quick sync?</em></h2>
-    <p class="section-sub reveal" style="text-align:center; margin: 0 auto 48px;">Appears automatically at the top of every Google Meet and Zoom call.</p>
-
-    <div class="meeting-demo reveal">
-      <div class="meeting-bar">
-        <div class="meeting-brand">⚡ Clarity</div>
-        <div class="meeting-stats">
-          <div class="mstat">
-            <div class="mstat-label">Duration</div>
-            <div class="mstat-value">10:23</div>
+<section class="meeting-section" id="meetings">
+  <div class="section-num">02</div>
+  <div class="meeting-layout">
+    <div>
+      <div class="meeting-demo reveal">
+        <div class="meeting-bar">
+          <div class="meeting-brand">⚡ CLARITY</div>
+          <div class="meeting-stats">
+            <div class="mstat">
+              <div class="mstat-lbl">Duration</div>
+              <div class="mstat-val" id="demoTimer">00:00</div>
+            </div>
+            <div class="mstat">
+              <div class="mstat-lbl">Cost</div>
+              <div class="mstat-val hot" id="demoCost">$0.00</div>
+            </div>
+            <div class="mstat">
+              <div class="mstat-lbl">Rate</div>
+              <div class="mstat-val">$75×8</div>
+            </div>
           </div>
-          <div class="mstat">
-            <div class="mstat-label">Cost</div>
-            <div class="mstat-value orange">$104.00</div>
-          </div>
-          <div class="mstat">
-            <div class="mstat-label">Rate</div>
-            <div class="mstat-value">$75/hr × 8</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.2)">⏸ ✕</div>
+        </div>
+        <div class="meeting-screen">
+          <div class="meeting-placeholder">
+            <div>📹</div>
+            <div>Your Google Meet appears here</div>
           </div>
         </div>
-        <div style="font-size:12px; color:#475569;">⏸ ✕</div>
       </div>
-      <div class="meeting-content">
-        <div>
-          <div style="font-size: 32px; margin-bottom: 8px;">📹</div>
-          <div>Your Google Meet or Zoom call appears here</div>
-          <div style="margin-top: 8px; color: #334155; font-size: 12px;">Clarity tracks cost silently in the background</div>
-        </div>
+    </div>
+    <div class="meeting-copy reveal reveal-delay-1">
+      <span class="section-tag">Meeting Cost Counter</span>
+      <h2>$104 IN<br><span class="orange">10 MINUTES.</span><br><span class="outline">STILL</span> SYNCING?</h2>
+      <p>The moment you join Google Meet or Zoom, Clarity shows a discreet bar at the top of your screen counting the real dollar cost — live, every second.</p>
+      <div class="cost-highlight">
+        US companies waste <strong>$37 billion</strong> a year on unnecessary meetings. Now you can see exactly where your share of that goes.
       </div>
     </div>
   </div>
 </section>
 
 <!-- PRIVACY -->
-<section id="privacy" style="background: rgba(8,14,30,0.5); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
-  <div class="container">
-    <div class="section-label reveal">Privacy first</div>
-    <h2 class="reveal">Your data stays<br><em>on your device.</em></h2>
-    <p class="section-sub reveal">No servers. No accounts. No tracking. Ever.</p>
+<section class="privacy-section" id="privacy">
+  <div class="section-num">03</div>
+  <span class="section-tag reveal">Privacy first</span>
+  <h2 class="reveal">YOUR DATA<br>STAYS <span class="blue">ON YOUR</span><br><span class="outline">DEVICE.</span></h2>
+  <p style="font-size:17px;color:rgba(255,255,255,0.4);max-width:480px;line-height:1.7;margin-top:16px" class="reveal reveal-delay-1">No servers. No accounts. No tracking. We literally cannot access your data — it never leaves Chrome.</p>
 
-    <div class="privacy-grid reveal">
-      <div class="privacy-item">
-        <div class="privacy-check">✓</div>
-        <div class="privacy-text">
-          <strong>No account required</strong>
-          <span>Install and use immediately. We never ask for your email.</span>
-        </div>
+  <div class="privacy-grid">
+    <div class="privacy-item reveal">
+      <div class="privacy-check">✓</div>
+      <div>
+        <div class="privacy-title">No account required</div>
+        <div class="privacy-desc">Install and use immediately. We never ask for your email, name, or anything personal.</div>
       </div>
-      <div class="privacy-item">
-        <div class="privacy-check">✓</div>
-        <div class="privacy-text">
-          <strong>100% local storage</strong>
-          <span>All your data lives in your browser. Zero bytes sent anywhere.</span>
-        </div>
+    </div>
+    <div class="privacy-item reveal reveal-delay-1">
+      <div class="privacy-check">✓</div>
+      <div>
+        <div class="privacy-title">100% local storage</div>
+        <div class="privacy-desc">All data lives in Chrome's built-in storage on your device. Zero bytes sent anywhere.</div>
       </div>
-      <div class="privacy-item">
-        <div class="privacy-check">✓</div>
-        <div class="privacy-text">
-          <strong>No tracking or analytics</strong>
-          <span>We have no idea who you are or how you use Clarity.</span>
-        </div>
+    </div>
+    <div class="privacy-item reveal reveal-delay-2">
+      <div class="privacy-check">✓</div>
+      <div>
+        <div class="privacy-title">No tracking or analytics</div>
+        <div class="privacy-desc">We have absolutely no idea who you are or how you use Clarity. That's by design.</div>
       </div>
-      <div class="privacy-item">
-        <div class="privacy-check">✓</div>
-        <div class="privacy-text">
-          <strong>Export your data anytime</strong>
-          <span>Download everything with one click. Delete it just as easily.</span>
-        </div>
+    </div>
+    <div class="privacy-item reveal">
+      <div class="privacy-check">✓</div>
+      <div>
+        <div class="privacy-title">Export anytime</div>
+        <div class="privacy-desc">Download all your data as JSON with one click. Delete it just as easily.</div>
       </div>
-      <div class="privacy-item">
-        <div class="privacy-check">✓</div>
-        <div class="privacy-text">
-          <strong>Open permissions</strong>
-          <span>Only accesses the specific sites it needs to. Nothing more.</span>
-        </div>
+    </div>
+    <div class="privacy-item reveal reveal-delay-1">
+      <div class="privacy-check">✓</div>
+      <div>
+        <div class="privacy-title">Minimal permissions</div>
+        <div class="privacy-desc">Only accesses the specific sites it needs to. No broad host permissions. No wildcards.</div>
       </div>
-      <div class="privacy-item">
-        <div class="privacy-check">✓</div>
-        <div class="privacy-text">
-          <strong>No ads. Ever.</strong>
-          <span>Built by one person. Supported by donations. That's it.</span>
-        </div>
+    </div>
+    <div class="privacy-item reveal reveal-delay-2">
+      <div class="privacy-check">✓</div>
+      <div>
+        <div class="privacy-title">No ads. Ever.</div>
+        <div class="privacy-desc">Built by one person. Supported by voluntary donations. No investors. No agenda.</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
-<section class="cta-section">
-  <div class="container">
-    <div class="cta-box reveal">
-      <div class="section-label" style="margin-bottom:20px">Get started</div>
-      <h2>Take back control<br>of your <em>time.</em></h2>
-      <p>Free forever. No account. Works in Chrome, Edge, and Brave.</p>
+<!-- SUPPORT / DONATION -->
+<section class="support-section" id="support">
+  <div class="support-inner">
+    <span class="section-tag reveal" style="display:block;text-align:center">Support the project</span>
+    <h2 class="reveal">KEEP CLARITY<br><span class="blue">FREE</span> <span class="outline">FOREVER.</span></h2>
+    <p class="reveal reveal-delay-1">Clarity is built solo, with no funding and no ads. Your support keeps new modules coming and the extension free for everyone. Supporters get everything unlocked as a thank you.</p>
 
-      <a href="https://ko-fi.com/clarifyapp" class="btn-primary" style="font-size:17px; padding: 18px 36px;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-        Add to Chrome — It's Free
-      </a>
-
-      <br>
-
-      <a href="https://ko-fi.com/clarifyapp" class="kofi-btn">
-        ☕ Support on Ko-fi — Unlock all modules
-      </a>
-
-      <p style="margin-top: 24px; font-size: 13px; color: var(--dim);">
-        Supporters get Meeting Cost Counter, Dark Pattern Detector, Salary Slip, and Subscription Graveyard — plus every future module free.
-      </p>
+    <div class="support-tiers reveal reveal-delay-2">
+      <div class="tier">
+        <div class="tier-name">Free User</div>
+        <div class="tier-price">$0<span>/forever</span></div>
+        <div class="tier-desc">The full social media tracker, weekly charts, data export, and nudge overlay.</div>
+        <div class="tier-perks">
+          <div class="tier-perk">Social Media Time Tracker</div>
+          <div class="tier-perk">7-day weekly chart</div>
+          <div class="tier-perk">Data export / import</div>
+          <div class="tier-perk">Nudge overlay</div>
+        </div>
+        <a href="https://chromewebstore.google.com/detail/eamlgefleeenefkgdmdkkjhhpjdmhdmn" class="tier-btn secondary">Install Free →</a>
+      </div>
+      <div class="tier featured">
+        <div class="tier-name">Supporter</div>
+        <div class="tier-price">Any<span> amount</span></div>
+        <div class="tier-desc">Support on Ko-fi and unlock everything — all current and future modules, free forever.</div>
+        <div class="tier-perks">
+          <div class="tier-perk">Everything in Free</div>
+          <div class="tier-perk">Meeting Cost Counter</div>
+          <div class="tier-perk">Dark Pattern Detector</div>
+          <div class="tier-perk">Salary Slip (coming soon)</div>
+          <div class="tier-perk">Subscription Graveyard (soon)</div>
+          <div class="tier-perk">Grandfathered into Pro free</div>
+        </div>
+        <a href="https://ko-fi.com/clarifyapp" class="tier-btn primary">Support on Ko-fi ☕</a>
+      </div>
     </div>
+
+    <div class="kofi-strip reveal reveal-delay-3">
+      <p>Love Clarity but can't pay right now? Sharing it with one friend helps just as much. ☕</p>
+      <a href="https://ko-fi.com/clarifyapp">Buy us a coffee →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section">
+  <h2 class="reveal">TAKE BACK<br><span class="blue">CONTROL</span><br>OF YOUR <span class="outline">TIME.</span></h2>
+  <p class="reveal reveal-delay-1">Free forever. No account. Works in Chrome, Edge, and Brave. Install in 10 seconds.</p>
+  <div class="cta-actions reveal reveal-delay-2">
+    <a href="https://chromewebstore.google.com/detail/eamlgefleeenefkgdmdkkjhhpjdmhdmn" class="btn-main" style="font-size:17px;padding:20px 44px">
+      Add to Chrome — It's Free
+    </a>
+    <a href="https://ko-fi.com/clarifyapp" class="btn-ghost" style="padding:20px 32px">
+      ☕ Support on Ko-fi
+    </a>
   </div>
 </section>
 
@@ -805,34 +873,81 @@
   <div class="footer-logo">Clarity<span>.</span></div>
   <div class="footer-links">
     <a href="#features">Features</a>
+    <a href="#meetings">Meetings</a>
     <a href="#privacy">Privacy</a>
+    <a href="#support">Support</a>
     <a href="https://ko-fi.com/clarifyapp">Ko-fi</a>
     <a href="https://twitter.com/aclarityapp">Twitter</a>
   </div>
-  <div class="footer-copy">Built with ❤️ by one person. Free forever.</div>
+  <div class="footer-copy">Built solo · Free forever · © 2026 Clarity</div>
 </footer>
 
 <script>
-// Scroll reveal
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry, i) => {
-    if (entry.isIntersecting) {
-      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+// CURSOR
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cursor.style.left=mx+'px';cursor.style.top=my+'px';
+});
+(function animRing(){
+  rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.transform='translate(-50%,-50%) scale(2.5)';ring.style.transform='translate(-50%,-50%) scale(0.5)'});
+  el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';ring.style.transform='translate(-50%,-50%) scale(1)'});
+});
+
+// SCROLL REVEAL
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('up')});
+},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// COUNTER ANIMATION
+function animCount(el,target,suffix=''){
+  let start=0;
+  const dur=2000;const startTime=performance.now();
+  function step(now){
+    const p=Math.min((now-startTime)/dur,1);
+    const ease=1-Math.pow(1-p,4);
+    el.textContent=Math.round(start+(target-start)*ease)+suffix;
+    if(p<1)requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+const statObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('[data-target]').forEach(el=>{
+        animCount(el,parseInt(el.dataset.target));
+      });
+      statObs.unobserve(e.target);
     }
   });
-}, { threshold: 0.1 });
+},{threshold:0.5});
+document.querySelectorAll('.stat-cell').forEach(el=>statObs.observe(el));
 
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-// Animate meeting cost counter
-let cost = 0;
-const costEl = document.querySelector('.mstat-value.orange');
-if (costEl) {
-  setInterval(() => {
-    cost += 0.17;
-    costEl.textContent = '$' + cost.toFixed(2);
-  }, 1000);
-}
+// LIVE MEETING DEMO TIMER
+let demoSec=0,demoPaused=false;
+setInterval(()=>{
+  if(!demoPaused){
+    demoSec++;
+    const m=Math.floor(demoSec/60).toString().padStart(2,'0');
+    const s=(demoSec%60).toString().padStart(2,'0');
+    const timerEl=document.getElementById('demoTimer');
+    const costEl=document.getElementById('demoCost');
+    if(timerEl)timerEl.textContent=m+':'+s;
+    if(costEl){
+      const cost=(demoSec*(75*8/3600));
+      costEl.textContent='$'+cost.toFixed(2);
+      costEl.style.color=cost>50?'#ff4d00':cost>20?'#ffc400':'#ff4d00';
+    }
+  }
+},1000);
 </script>
 </body>
 </html>
